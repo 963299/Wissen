@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wissen</title>
+<meta name="theme-color" content="#1a0f2e">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  :root{
+    --bg: #150c26;
+    --bg-panel: #211138;
+    --bg-panel-2: #2b1547;
+    --line: #3d2a5c;
+    --ink: #f3eefb;
+    --ink-soft: #bdaed9;
+    --ink-faint: #8677a8;
+    --green: #5eea7d;
+    --green-soft: #2f6b45;
+    --violet: #9b7fe0;
+    --amber: #e0b64a;
+    --rust: #e0654a;
+    --blue: #4fa3e3;
+    --orange: #e8943f;
+    --yellow: #ecd23f;
+    --red: #e34f5c;
+    --radius: 18px;
+    --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{height:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+    background-image:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(94,234,125,0.08), transparent 60%),
+      radial-gradient(ellipse 700px 600px at 100% 0%, rgba(155,127,224,0.10), transparent 55%);
+    min-height:100%;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  #app{max-width:520px; margin:0 auto; min-height:100vh; display:flex; flex-direction:column;}
+
+  header.topbar{
+    position:sticky; top:0; z-index:20;
+    background:rgba(21,12,38,0.92); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+    padding:14px 18px calc(14px + env(safe-area-inset-top)) 18px;
+    padding-top: max(14px, env(safe-area-inset-top));
+    display:flex; align-items:center; gap:12px;
+  }
+  header.topbar .back{
+    background:none; border:none; color:var(--ink-soft); font-size:22px; cursor:pointer;
+    padding:4px 8px; margin-left:-8px; line-height:1;
+  }
+  header.topbar h1{
+    font-family:var(--serif); font-weight:600; font-size:20px; margin:0; flex:1;
+    letter-spacing:0.2px;
+  }
+  header.topbar .wordmark{display:flex; align-items:center; gap:10px;}
+  header.topbar .wordmark img{width:30px; height:30px; border-radius:8px;}
+  header.topbar .wordmark span{font-family:var(--serif); font-size:21px; font-weight:700; color:var(--green);
+    text-shadow:0 0 14px rgba(94,234,125,0.35);}
+  .icon-btn{
+    background:var(--bg-panel-2); border:1px solid var(--line); color:var(--ink);
+    width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:18px;
+  }
+  .icon-btn:active{transform:scale(0.94);}
+
+  main{flex:1; padding:18px; padding-bottom:100px;}
+
+  /* ---- Setup / config screen ---- */
+  .setup-card{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:var(--radius);
+    padding:22px; margin-top:10vh;
+  }
+  .setup-card h2{font-family:var(--serif); margin-top:0;}
+  .setup-card p{color:var(--ink-soft); font-size:14px; line-height:1.5;}
+  textarea, input[type=text], input[type=password]{
+    width:100%; background:#170e28; border:1px solid var(--line); color:var(--ink);
+    border-radius:12px; padding:12px 14px; font-family:ui-monospace, monospace; font-size:13px;
+    resize:vertical;
+  }
+  input[type=text], input[type=password]{font-family:var(--sans); font-size:15px;}
+  label{display:block; font-size:13px; color:var(--ink-soft); margin:14px 0 6px;}
+
+  button.primary{
+    width:100%; background:linear-gradient(180deg, var(--green), #3fc964);
+    color:#0d2013; border:none; border-radius:14px; padding:14px; font-size:16px; font-weight:700;
+    margin-top:18px; cursor:pointer; box-shadow:0 6px 20px rgba(94,234,125,0.25);
+  }
+  button.primary:active{transform:translateY(1px);}
+  button.secondary{
+    width:100%; background:var(--bg-panel-2); color:var(--ink); border:1px solid var(--line);
+    border-radius:14px; padding:13px; font-size:15px; font-weight:600; margin-top:10px; cursor:pointer;
+  }
+  button.ghost{
+    background:none; border:none; color:var(--violet); font-size:14px; cursor:pointer; padding:8px;
+  }
+  button.danger{color:var(--rust);}
+  button:disabled{opacity:0.5;}
+
+  /* ---- Students strip ---- */
+  .students-row{display:flex; gap:10px; overflow-x:auto; padding:2px 2px 6px; margin-bottom:6px;}
+  .student-chip{
+    flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:6px;
+    padding:10px 4px; cursor:pointer; opacity:0.6; min-width:64px;
+  }
+  .student-chip.active{opacity:1;}
+  .student-chip .avatar{
+    width:52px; height:52px; border-radius:16px; background:var(--bg-panel-2);
+    border:2px solid var(--line); display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-size:20px; font-weight:700; color:var(--green);
+  }
+  .student-chip.active .avatar{border-color:var(--green); box-shadow:0 0 14px rgba(94,234,125,0.35);}
+  .student-chip .name{font-size:12px; color:var(--ink-soft); max-width:64px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .student-chip.active .name{color:var(--ink); font-weight:600;}
+  .student-chip.add .avatar{border-style:dashed; color:var(--ink-faint); font-size:24px;}
+
+  /* ---- Deck list (catalog style) ---- */
+  .section-title{
+    font-family:var(--serif); font-size:15px; color:var(--ink-faint); text-transform:none;
+    margin:22px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--line);
+  }
+  .deck-card{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:14px;
+    padding:16px; margin-bottom:12px; display:flex; align-items:center; gap:14px; cursor:pointer;
+    position:relative; overflow:hidden;
+  }
+  .deck-card::before{
+    content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--accent, var(--green));
+    opacity:0.8;
+  }
+  .deck-card .info{flex:1; min-width:0;}
+  .deck-card .info h3{margin:0 0 4px; font-family:var(--serif); font-size:17px;}
+  .deck-card .info .meta{font-size:13px; color:var(--ink-soft);}
+  .deck-card .due-badge{
+    background:rgba(94,234,125,0.14); color:var(--green); font-weight:700; font-size:13px;
+    padding:5px 10px; border-radius:10px; flex-shrink:0;
+  }
+  .deck-card .due-badge.zero{background:rgba(134,119,168,0.14); color:var(--ink-faint);}
+
+  .empty-state{
+    text-align:center; padding:40px 20px; color:var(--ink-faint);
+  }
+  .empty-state .glyph{font-size:38px; margin-bottom:10px; opacity:0.6;}
+  .empty-state p{font-size:14px; line-height:1.5; max-width:280px; margin:6px auto 0;}
+
+  .fab{
+    position:fixed; bottom:24px; right:calc(50% - 260px + 20px); z-index:30;
+    background:var(--green); color:#0d2013; border:none; width:58px; height:58px;
+    border-radius:18px; font-size:28px; box-shadow:0 8px 24px rgba(94,234,125,0.35);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  @media (max-width:560px){ .fab{ right:20px; } }
+  .fab:active{transform:scale(0.94);}
+
+  .fab-menu{
+    position:fixed; bottom:92px; right:calc(50% - 260px + 20px); z-index:30;
+    display:flex; flex-direction:column; gap:10px; align-items:flex-end;
+  }
+  @media (max-width:560px){ .fab-menu{ right:20px; } }
+  .fab-menu button{
+    background:var(--bg-panel-2); border:1px solid var(--line); color:var(--ink);
+    padding:10px 16px; border-radius:14px; font-size:14px; font-weight:600; cursor:pointer;
+    box-shadow:0 6px 16px rgba(0,0,0,0.3); white-space:nowrap;
+  }
+
+  /* ---- Cards list inside deck ---- */
+  .card-row{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:12px;
+    padding:12px 14px; margin-bottom:8px; font-size:14px;
+  }
+  .card-row .front{color:var(--ink); margin-bottom:4px;}
+  .card-row .back{color:var(--ink-soft); font-size:13px;}
+  .card-row .row-actions{display:flex; gap:8px; margin-top:8px;}
+  .card-row .row-actions button{font-size:12px; padding:5px 10px; border-radius:8px; background:var(--bg-panel-2); border:1px solid var(--line); color:var(--ink-soft);}
+
+  /* ---- Capture / AI flow ---- */
+  .photo-drop{
+    border:2px dashed var(--line); border-radius:16px; padding:36px 20px; text-align:center;
+    color:var(--ink-faint); cursor:pointer; margin-bottom:16px;
+  }
+  .photo-drop.has-image{padding:0; border-style:solid;}
+  .photo-drop img{width:100%; border-radius:14px; display:block;}
+  .photo-drop .glyph{font-size:34px; margin-bottom:8px;}
+  input[type=file]{display:none;}
+
+  .ai-status{
+    display:flex; align-items:center; gap:10px; color:var(--violet); font-size:14px; margin:14px 0;
+  }
+  .spinner{
+    width:18px; height:18px; border-radius:50%; border:2px solid var(--line);
+    border-top-color:var(--violet); animation:spin 0.8s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .summary-box{
+    background:var(--bg-panel-2); border:1px solid var(--line); border-radius:14px; padding:14px;
+    font-size:14px; line-height:1.55; color:var(--ink-soft); margin-bottom:18px; white-space:pre-wrap;
+  }
+  .gen-card{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:12px; padding:12px; margin-bottom:10px;
+  }
+  .gen-card label{margin:0 0 4px; font-size:11px; text-transform:uppercase; letter-spacing:0.4px; color:var(--ink-faint);}
+  .gen-card textarea{min-height:44px; font-family:var(--sans); font-size:14px; margin-bottom:8px;}
+  .gen-card .remove-card{font-size:12px; color:var(--rust); background:none; border:none; cursor:pointer; padding:2px;}
+
+  /* ---- Review flashcard ---- */
+  .review-wrap{display:flex; flex-direction:column; align-items:center; padding-top:14px;}
+  .progress-bar{
+    width:100%; height:5px; background:var(--bg-panel-2); border-radius:4px; overflow:hidden; margin-bottom:24px;
+  }
+  .progress-bar .fill{height:100%; background:var(--green); transition:width 0.25s ease;}
+  .flashcard{
+    width:100%; min-height:260px; background:var(--bg-panel); border:1px solid var(--line);
+    border-radius:20px; padding:28px 22px; display:flex; align-items:center; justify-content:center;
+    text-align:center; cursor:pointer; position:relative; box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  }
+  .flashcard .label{
+    position:absolute; top:16px; left:20px; font-size:11px; text-transform:uppercase; letter-spacing:0.6px;
+    color:var(--ink-faint);
+  }
+  .flashcard .content{font-family:var(--serif); font-size:19px; line-height:1.5;}
+  .flashcard .content.answer{color:var(--green);}
+  .tap-hint{color:var(--ink-faint); font-size:13px; margin-top:14px;}
+  .grade-row{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; width:100%; margin-top:20px;}
+  .grade-row button{
+    padding:14px 4px; border-radius:12px; border:1px solid var(--line); font-size:13px; font-weight:700; cursor:pointer;
+    display:flex; flex-direction:column; gap:3px; align-items:center;
+  }
+  .grade-row .again{background:rgba(224,101,74,0.14); color:var(--rust);}
+  .grade-row .hard{background:rgba(224,182,74,0.14); color:var(--amber);}
+  .grade-row .good{background:rgba(94,234,125,0.14); color:var(--green);}
+  .grade-row .easy{background:rgba(155,127,224,0.16); color:var(--violet);}
+  .grade-row .interval{font-size:10px; font-weight:400; opacity:0.75;}
+
+  .session-end{text-align:center; padding:60px 20px;}
+  .session-end .glyph{font-size:48px;}
+  .session-end h2{font-family:var(--serif);}
+
+  /* ---- Modal ---- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(10,6,20,0.65); backdrop-filter:blur(3px);
+    display:flex; align-items:flex-end; justify-content:center; z-index:50;
+  }
+  .sheet{
+    background:var(--bg-panel); border:1px solid var(--line); border-radius:20px 20px 0 0;
+    width:100%; max-width:520px; padding:22px 20px calc(24px + env(safe-area-inset-bottom));
+    max-height:85vh; overflow-y:auto;
+  }
+  .sheet h3{font-family:var(--serif); margin-top:0;}
+  .offline-banner{
+    background:rgba(224,182,74,0.14); color:var(--amber); font-size:13px; text-align:center;
+    padding:8px; border-bottom:1px solid var(--line);
+  }
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:60;
+    background:var(--bg-panel-2); border:1px solid var(--line); color:var(--ink);
+    padding:12px 18px; border-radius:12px; font-size:14px; box-shadow:0 8px 20px rgba(0,0,0,0.3);
+  }
+  ::-webkit-scrollbar{width:0; height:0;}
+
+  /* ---- color/avatar picker ---- */
+  .color-row{display:flex; gap:10px; flex-wrap:wrap; margin:10px 0 16px;}
+  .color-dot{
+    width:36px; height:36px; border-radius:50%; cursor:pointer; border:3px solid transparent;
+    display:flex; align-items:center; justify-content:center; font-size:16px;
+  }
+  .color-dot.selected{border-color:#fff; box-shadow:0 0 0 2px rgba(255,255,255,0.15);}
+  .avatar-grid{
+    display:grid; grid-template-columns:repeat(5,1fr); gap:10px; max-height:280px; overflow-y:auto;
+    margin:10px 0 6px; padding:2px;
+  }
+  .avatar-pick{
+    width:100%; aspect-ratio:1; border-radius:14px; overflow:hidden; cursor:pointer;
+    border:3px solid var(--line); background:var(--bg-panel-2);
+  }
+  .avatar-pick img{width:100%; height:100%; object-fit:cover; display:block;}
+  .avatar-pick.selected{border-color:var(--green);}
+
+  .deco-icon{position:absolute; opacity:0.10; pointer-events:none; filter:saturate(1.3);}
+  .home-deco{position:relative; overflow:hidden;}
+
+  .summary-section{
+    background:var(--bg-panel-2); border:1px solid var(--line); border-radius:14px; padding:14px; margin:14px 0;
+  }
+  .summary-section .hdr{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .summary-section .hdr b{font-family:var(--serif); font-size:15px;}
+  .summary-section .txt{font-size:14px; color:var(--ink-soft); line-height:1.5; white-space:pre-wrap;}
+  .summary-section .edit-link{font-size:12px; color:var(--violet); background:none; border:none; cursor:pointer;}
+  .empty-state img.glyph-img{width:64px; height:64px; object-fit:cover; border-radius:16px; margin-bottom:10px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script type="module">
+import { initializeApp } from "https://esm.sh/firebase@12.19.0/app";
+import {
+  getDatabase, ref, push, set, update, remove, get, onValue, off, serverTimestamp, child
+} from "https://esm.sh/firebase@12.19.0/database";
+import { getAI, getGenerativeModel, GoogleAIBackend } from "https://esm.sh/firebase@12.19.0/ai";
+
+/* =========================================================
+   WISSEN — flashcards com repetição espaçada + geração por IA
+   Armazenamento: Firebase Realtime Database
+   IA: Firebase AI Logic (Gemini) — roda no cliente, sem servidor
+   ========================================================= */
+
+const LS_CONFIG = 'wissen_firebase_config';
+const LS_CACHE = 'wissen_cache_v1';
+const LS_QUEUE = 'wissen_queue_v1';
+const LS_STUDENT = 'wissen_current_student';
+
+const STUDENT_COLORS = [
+  {id:'green', hex:'#5eea7d'}, {id:'blue', hex:'#4fa3e3'}, {id:'orange', hex:'#e8943f'},
+  {id:'red', hex:'#e34f5c'}, {id:'yellow', hex:'#ecd23f'}, {id:'violet', hex:'#9b7fe0'}
+];
+function colorHex(id){ return (STUDENT_COLORS.find(c=>c.id===id) || STUDENT_COLORS[0]).hex; }
+
+const AVATAR_LIST = [
+  'lion','seal','penguin','owl','horse','zebra','horse2','duck','dog','cat','mouse','hamster',
+  'squirrel','giraffe','zebra2','hippo','shark','monkey','tiger','panther','turtle','frog',
+  'polarbear','rhino','elephant','kangaroo','fox','redpanda'
+];
+
+function openSheet(html){
+  closeSheet();
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.id = 'activeSheetOverlay';
+  overlay.innerHTML = `<div class="sheet">${html}</div>`;
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeSheet(); });
+  document.body.appendChild(overlay);
+}
+function closeSheet(){
+  const el = document.getElementById('activeSheetOverlay');
+  if(el) el.remove();
+}
+
+let firebaseApp = null, db = null, aiModel = null;
+let state = {
+  students: {},
+  currentStudentId: null,
+  view: 'home', // home | deck | capture | review | 
+  currentDeckId: null,
+  reviewQueue: [],
+  reviewIndex: 0,
+  reviewFlipped: false,
+  reviewStats: {again:0, hard:0, good:0, easy:0},
+  pendingGenCards: null, // {summary, cards:[{front,back}], deckId}
+  isOnline: navigator.onLine,
+  connected: false,
+};
+
+const $app = document.getElementById('app');
+
+/* ---------- utils ---------- */
+function uid(){ return 'id' + Math.random().toString(36).slice(2) + Date.now().toString(36); }
+function compressImage(dataUrl, maxDim=480, quality=0.6){
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if(width > height){ if(width > maxDim){ height = Math.round(height*maxDim/width); width = maxDim; } }
+      else { if(height > maxDim){ width = Math.round(width*maxDim/height); height = maxDim; } }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(null);
+    img.src = dataUrl;
+  });
+}
+function nowTs(){ return Date.now(); }
+function daysToMs(d){ return d * 24 * 60 * 60 * 1000; }
+function fmtDue(ts){
+  if(!ts) return 'novo';
+  const diff = ts - nowTs();
+  if(diff <= 0) return 'hoje';
+  const d = Math.ceil(diff / daysToMs(1));
+  return d === 1 ? 'amanhã' : `em ${d}d`;
+}
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function saveCache(){
+  try{ localStorage.setItem(LS_CACHE, JSON.stringify(state.students)); }catch(e){}
+}
+function loadCache(){
+  try{
+    const raw = localStorage.getItem(LS_CACHE);
+    if(raw) state.students = JSON.parse(raw);
+  }catch(e){}
+}
+function queuePush(op){
+  try{
+    const q = JSON.parse(localStorage.getItem(LS_QUEUE) || '[]');
+    q.push(op);
+    localStorage.setItem(LS_QUEUE, JSON.stringify(q));
+  }catch(e){}
+}
+function toast(msg){
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 2600);
+}
+
+/* ---------- Firebase config / bootstrap ---------- */
+function getSavedConfig(){
+  try{ return JSON.parse(localStorage.getItem(LS_CONFIG) || 'null'); }catch(e){ return null; }
+}
+
+function initFirebase(config){
+  firebaseApp = initializeApp(config);
+  db = getDatabase(firebaseApp);
+  try{
+    const ai = getAI(firebaseApp, { backend: new GoogleAIBackend() });
+    aiModel = getGenerativeModel(ai, { model: "gemini-3.6-flash" });
+  }catch(e){
+    console.error('Firebase AI Logic indisponível:', e);
+  }
+  attachListeners();
+}
+
+function attachListeners(){
+  const connRef = ref(db, '.info/connected');
+  onValue(connRef, (snap) => {
+    state.isOnline = navigator.onLine;
+    state.connected = !!snap.val();
+    render();
+    if(state.connected) flushQueue();
+  });
+
+  const studentsRef = ref(db, 'students');
+  onValue(studentsRef, (snap) => {
+    const val = snap.val() || {};
+    state.students = val;
+    saveCache();
+    if(!state.currentStudentId || !state.students[state.currentStudentId]){
+      const ids = Object.keys(state.students);
+      state.currentStudentId = ids[0] || null;
+    }
+    render();
+  }, (err) => {
+    console.error(err);
+    loadCache();
+    render();
+  });
+}
+
+function flushQueue(){
+  let q = [];
+  try{ q = JSON.parse(localStorage.getItem(LS_QUEUE) || '[]'); }catch(e){}
+  if(!q.length) return;
+  const remaining = [];
+  q.forEach(op => {
+    try{
+      if(op.type === 'set') set(ref(db, op.path), op.value);
+      else if(op.type === 'update') update(ref(db, op.path), op.value);
+      else if(op.type === 'remove') remove(ref(db, op.path));
+    }catch(e){ remaining.push(op); }
+  });
+  localStorage.setItem(LS_QUEUE, JSON.stringify(remaining));
+  if(q.length) toast('Sincronizado ✓');
+}
+
+function dbSet(path, value){
+  if(state.connected){ set(ref(db, path), value).catch(()=>{ queuePush({type:'set', path, value}); }); }
+  else { queuePush({type:'set', path, value}); applyLocalOptimistic(path, value, 'set'); }
+}
+function dbUpdate(path, value){
+  if(state.connected){ update(ref(db, path), value).catch(()=>{ queuePush({type:'update', path, value}); }); }
+  else { queuePush({type:'update', path, value}); applyLocalOptimistic(path, value, 'update'); }
+}
+function dbRemove(path){
+  if(state.connected){ remove(ref(db, path)).catch(()=>{ queuePush({type:'remove', path}); }); }
+  else { queuePush({type:'remove', path}); }
+}
+function applyLocalOptimistic(path, value, type){
+  // aplica no cache local (state.students) pra UI refletir na hora, mesmo offline
+  const parts = path.split('/').filter(Boolean);
+  let obj = state;
+  if(parts[0] !== 'students') return;
+  obj = state.students;
+  for(let i=1;i<parts.length-1;i++){
+    if(!obj[parts[i]]) obj[parts[i]] = {};
+    obj = obj[parts[i]];
+  }
+  const last = parts[parts.length-1];
+  if(type === 'set') obj[last] = value;
+  else if(type === 'update') obj[last] = {...(obj[last]||{}), ...value};
+  saveCache();
+}
+
+window.addEventListener('online', () => { state.isOnline = true; render(); });
+window.addEventListener('offline', () => { state.isOnline = false; render(); });
+
+/* ---------- SM-2 (repetição espaçada, mesmo princípio do Anki) ---------- */
+// grade: 0 Again, 1 Hard, 2 Good, 3 Easy
+function scheduleCard(srs, grade){
+  srs = srs || {ease:2.5, interval:0, reps:0, dueDate:0};
+  let {ease, interval, reps} = srs;
+  ease = ease || 2.5; interval = interval || 0; reps = reps || 0;
+
+  if(grade === 0){
+    reps = 0;
+    ease = Math.max(1.3, ease - 0.2);
+    const dueDate = nowTs() + 10*60*1000; // reaparece em 10 min (relearn)
+    return {ease, interval: 0, reps, dueDate, lastReview: nowTs()};
+  }
+  if(reps === 0) interval = 1;
+  else if(reps === 1) interval = 6;
+  else interval = Math.round(interval * ease);
+
+  if(grade === 1){ ease = Math.max(1.3, ease - 0.15); interval = Math.max(1, Math.round(interval*0.8)); }
+  if(grade === 3){ ease = ease + 0.15; interval = Math.round(interval*1.3); }
+  reps += 1;
+  const dueDate = nowTs() + daysToMs(interval);
+  return {ease, interval, reps, dueDate, lastReview: nowTs()};
+}
+function intervalLabel(srs, grade){
+  const r = scheduleCard(srs, grade);
+  if(grade === 0) return '10min';
+  return r.interval === 1 ? '1d' : `${r.interval}d`;
+}
+
+/* ---------- data helpers ---------- */
+function getStudent(id){ return state.students[id]; }
+function getDecks(studentId){ return (state.students[studentId] && state.students[studentId].decks) || {}; }
+function getCards(studentId, deckId){
+  const d = getDecks(studentId)[deckId];
+  return (d && d.cards) || {};
+}
+function countDue(studentId, deckId){
+  const cards = getCards(studentId, deckId);
+  const t = nowTs();
+  return Object.values(cards).filter(c => !c.srs || !c.srs.dueDate || c.srs.dueDate <= t).length;
+}
+
+/* ---------- render ---------- */
+function render(){
+  if(!getSavedConfig()){ return renderSetup(); }
+  if(!firebaseApp){ initFirebase(getSavedConfig()); return; }
+
+  let html = '';
+  if(!state.isOnline || !state.connected){
+    html += `<div class="offline-banner">📡 Offline — usando dados já sincronizados${JSON.parse(localStorage.getItem(LS_QUEUE)||'[]').length ? '. Suas revisões serão enviadas ao reconectar.' : '.'}</div>`;
+  }
+
+  if(state.view === 'home') html += renderHome();
+  else if(state.view === 'deck') html += renderDeck();
+  else if(state.view === 'capture') html += renderCapture();
+  else if(state.view === 'review') html += renderReview();
+
+  $app.innerHTML = html;
+  bindEvents();
+}
+
+function renderTopbar(title, opts={}){
+  return `
+  <header class="topbar">
+    ${opts.back ? `<button class="back" data-action="back">←</button>` : ''}
+    ${opts.wordmark ? `
+      <div class="wordmark" style="flex:1">
+        <img src="icon-192.png" alt="">
+        <span>Wissen</span>
+      </div>
+    ` : `<h1>${title}</h1>`}
+    ${opts.right || ''}
+  </header>`;
+}
+
+function renderSetup(){
+  const html = `
+  <div style="max-width:480px;margin:0 auto;padding:20px;">
+    <div class="setup-card">
+      <h2>⚙️ Configurar Wissen</h2>
+      <p>Cole aqui o objeto <b>firebaseConfig</b> do seu projeto Firebase (Console → Configurações do projeto → SDK do Firebase). Use um projeto separado do app do cliente.</p>
+      <label>Config do Firebase (JSON)</label>
+      <textarea id="cfgInput" rows="8" placeholder='{"apiKey":"...","authDomain":"...","databaseURL":"...","projectId":"..."}'></textarea>
+      <p style="font-size:12px;">Antes de colar: no Console do Firebase, ative o <b>Realtime Database</b> e, em "Build → AI Logic", ative o <b>Gemini Developer API</b> (é grátis para começar).</p>
+      <button class="primary" id="saveCfgBtn">Salvar e continuar</button>
+    </div>
+  </div>`;
+  $app.innerHTML = html;
+  document.getElementById('saveCfgBtn').onclick = () => {
+    const raw = document.getElementById('cfgInput').value.trim();
+    try{
+      const cfg = JSON.parse(raw);
+      localStorage.setItem(LS_CONFIG, JSON.stringify(cfg));
+      initFirebase(cfg);
+    }catch(e){
+      alert('JSON inválido. Copie exatamente o objeto firebaseConfig do console do Firebase.');
+    }
+  };
+}
+
+function renderStudentsRow(){
+  const ids = Object.keys(state.students);
+  let html = `<div class="students-row">`;
+  ids.forEach(id => {
+    const s = state.students[id];
+    const hex = colorHex(s.color);
+    const avatarInner = s.avatar
+      ? `<img src="assets/avatars/${s.avatar}.png" style="width:100%; height:100%; object-fit:cover; border-radius:16px;">`
+      : (s.name||'?').trim()[0]?.toUpperCase() || '?';
+    html += `
+      <div class="student-chip ${id===state.currentStudentId?'active':''}" data-action="pick-student" data-id="${id}">
+        <div class="avatar" style="border-color:${id===state.currentStudentId?hex:'var(--line)'}; ${id===state.currentStudentId?`box-shadow:0 0 14px ${hex}55;`:''} overflow:hidden;">${avatarInner}</div>
+        <div class="name">${escapeHtml(s.name||'')}</div>
+      </div>`;
+  });
+  html += `
+    <div class="student-chip add" data-action="add-student">
+      <div class="avatar">+</div>
+      <div class="name">Novo</div>
+    </div>
+  </div>`;
+  if(state.currentStudentId){
+    html += `<button class="ghost" data-action="edit-student" style="margin:-6px 0 4px;">✏️ Editar perfil</button>`;
+  }
+  return html;
+}
+
+function renderHome(){
+  const studentId = state.currentStudentId;
+  const student = studentId ? getStudent(studentId) : null;
+  const accent = student ? colorHex(student.color) : '#5eea7d';
+  let body = '';
+  if(!studentId){
+    body = `<div class="empty-state">
+      <img class="glyph-img" src="assets/icons/icon_tree.png">
+      <p>Adicione um estudante para começar a criar baralhos.</p>
+    </div>`;
+  } else {
+    const decks = getDecks(studentId);
+    const deckIds = Object.keys(decks);
+    body += `<div class="section-title">Baralhos</div>`;
+    if(!deckIds.length){
+      body += `<div class="empty-state">
+        <img class="glyph-img" src="assets/icons/icon_owl.png">
+        <p>Nenhum baralho ainda. Toque em "+" para criar um a partir de uma foto da apostila ou manualmente.</p>
+      </div>`;
+    } else {
+      deckIds.forEach(id => {
+        const d = decks[id];
+        const cardCount = Object.keys(d.cards||{}).length;
+        const due = countDue(studentId, id);
+        body += `
+        <div class="deck-card" data-action="open-deck" data-id="${id}" style="--accent:${accent}">
+          <div class="info">
+            <h3>${escapeHtml(d.name||'Sem nome')}</h3>
+            <div class="meta">${cardCount} card${cardCount===1?'':'s'}${d.subject ? ' · ' + escapeHtml(d.subject) : ''}</div>
+          </div>
+          <div class="due-badge ${due===0?'zero':''}" style="${due>0?`background:${accent}22; color:${accent};`:''}">${due>0 ? due+' pra revisar' : 'em dia'}</div>
+        </div>`;
+      });
+    }
+  }
+
+  return `
+  ${renderTopbar('', {wordmark:true})}
+  <main>
+    ${renderStudentsRow()}
+    ${body}
+  </main>
+  ${studentId ? `
+  <div class="fab-menu hidden" id="fabMenu">
+    <button data-action="new-deck-manual">📝 Baralho manual</button>
+    <button data-action="new-deck-photo">📷 Baralho a partir de foto</button>
+  </div>
+  <button class="fab" data-action="toggle-fab">+</button>` : ''}
+  `;
+}
+
+function renderDeck(){
+  const studentId = state.currentStudentId;
+  const deckId = state.currentDeckId;
+  const deck = getDecks(studentId)[deckId];
+  if(!deck){ state.view = 'home'; return renderHome(); }
+  const cards = deck.cards || {};
+  const cardIds = Object.keys(cards);
+  const due = countDue(studentId, deckId);
+
+  let rows = '';
+  if(!cardIds.length){
+    rows = `<div class="empty-state"><img class="glyph-img" src="assets/icons/icon_wave.png"><p>Baralho vazio. Adicione cards manualmente ou tire uma foto da página.</p></div>`;
+  } else {
+    cardIds.forEach(cid => {
+      const c = cards[cid];
+      rows += `
+      <div class="card-row">
+        ${c.image ? `<img src="${c.image}" style="width:100%; max-height:120px; object-fit:cover; border-radius:8px; margin-bottom:8px;">` : ''}
+        <div class="front">${escapeHtml(c.front)}</div>
+        <div class="back">${escapeHtml(c.back)}</div>
+        <div class="row-actions">
+          <button data-action="delete-card" data-id="${cid}">Excluir</button>
+        </div>
+      </div>`;
+    });
+  }
+
+  const summaryHtml = deck.summary
+    ? `<div class="summary-section">
+        <div class="hdr"><b>📝 Resumo</b><button class="edit-link" data-action="edit-summary">Editar</button></div>
+        <div class="txt">${escapeHtml(deck.summary)}</div>
+      </div>`
+    : `<div class="summary-section">
+        <div class="hdr"><b>📝 Resumo</b><button class="edit-link" data-action="edit-summary">Adicionar</button></div>
+        <div class="txt" style="opacity:0.6;">Nenhum resumo ainda. Cole aqui um resumo que você já tenha (do Gemini, por exemplo) ou escreva um.</div>
+      </div>`;
+
+  return `
+  ${renderTopbar(escapeHtml(deck.name), {back:true, right:`<button class="icon-btn" data-action="delete-deck">🗑️</button>`})}
+  <main>
+    <button class="primary" data-action="start-review" ${due===0?'disabled':''}>
+      ${due>0 ? `Revisar agora (${due})` : 'Nada pra revisar hoje'}
+    </button>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <button class="secondary" data-action="new-deck-photo" style="margin-top:0;">📷 Adicionar por foto</button>
+      <button class="secondary" data-action="add-card-manual" style="margin-top:0;">📝 Card manual</button>
+    </div>
+    ${summaryHtml}
+    <div class="section-title">Cards (${cardIds.length})</div>
+    ${rows}
+  </main>`;
+}
+
+function renderCapture(){
+  const gen = state.pendingGenCards;
+  let inner = '';
+
+  if(!gen){
+    inner = `
+    <div class="photo-drop" id="photoDrop" data-action="pick-photo">
+      <div class="glyph">📷</div>
+      <div>Toque para tirar foto ou escolher imagem da página</div>
+    </div>
+    <input type="file" id="photoInput" accept="image/*" capture="environment">
+    <p style="font-size:13px; color:var(--ink-soft); line-height:1.5;">
+      A IA vai ler a foto, gerar um resumo do conteúdo e montar perguntas e respostas prontas para virar cards de estudo. Você pode revisar e editar tudo antes de salvar.
+    </p>`;
+  } else if(gen.loading){
+    inner = `
+    <div class="photo-drop has-image"><img src="${gen.imageDataUrl}"></div>
+    <div class="ai-status"><div class="spinner"></div> Lendo a página e montando os cards…</div>`;
+  } else if(gen.error){
+    inner = `
+    <div class="photo-drop has-image"><img src="${gen.imageDataUrl}"></div>
+    <div class="ai-status" style="color:var(--rust)">⚠️ ${escapeHtml(gen.error)}</div>
+    <button class="secondary" data-action="retry-gen">Tentar de novo</button>`;
+  } else {
+    inner = `
+    <div class="photo-drop has-image"><img src="${gen.imageDataUrl}"></div>
+    <div class="section-title">Resumo</div>
+    <div class="summary-box" id="summaryBox" contenteditable="true">${escapeHtml(gen.summary)}</div>
+    <div class="section-title">Cards gerados (${gen.cards.length})</div>
+    ${gen.cards.map((c,i) => `
+      <div class="gen-card">
+        <label>Pergunta</label>
+        <textarea data-idx="${i}" data-field="front" oninput="window.__wissenEditGen(${i},'front',this.value)">${escapeHtml(c.front)}</textarea>
+        <label>Resposta</label>
+        <textarea data-idx="${i}" data-field="back" oninput="window.__wissenEditGen(${i},'back',this.value)">${escapeHtml(c.back)}</textarea>
+        <label style="display:flex; align-items:center; gap:8px; text-transform:none; font-size:13px; color:var(--ink-soft); cursor:pointer;">
+          <input type="checkbox" ${c.useImage ? 'checked' : ''} onchange="window.__wissenToggleImg(${i}, this.checked)" style="width:auto;">
+          🖼️ Este card precisa da imagem (ex: figura, diagrama)
+        </label>
+        <button class="remove-card" data-action="remove-gen-card" data-idx="${i}">Remover este card</button>
+      </div>
+    `).join('')}
+    <button class="secondary" data-action="add-gen-card">+ Adicionar card em branco</button>
+    <button class="primary" data-action="save-gen-cards">Salvar ${gen.cards.length} card${gen.cards.length===1?'':'s'} no baralho</button>
+    `;
+  }
+
+  return `
+  ${renderTopbar('Nova foto', {back:true})}
+  <main>${inner}</main>`;
+}
+
+function renderReview(){
+  const q = state.reviewQueue;
+  if(state.reviewIndex >= q.length){
+    const s = state.reviewStats;
+    return `
+    ${renderTopbar('Revisão', {back:true})}
+    <main>
+      <div class="session-end">
+        <img class="glyph-img" src="assets/icons/icon_sun.png" style="width:80px; height:80px;">
+        <h2>Sessão concluída</h2>
+        <p style="color:var(--ink-soft)">Novamente: ${s.again} · Difícil: ${s.hard} · Bom: ${s.good} · Fácil: ${s.easy}</p>
+        <button class="primary" data-action="review-again">🔁 Revisar novamente</button>
+        <button class="secondary" data-action="back-to-deck">Voltar ao baralho</button>
+      </div>
+    </main>`;
+  }
+  const card = q[state.reviewIndex];
+  const pct = Math.round((state.reviewIndex / q.length) * 100);
+  const front = card.front, back = card.back;
+  const showBack = state.reviewFlipped;
+
+  return `
+  ${renderTopbar('Revisão', {back:true})}
+  <main>
+    <div class="review-wrap">
+      <div class="progress-bar"><div class="fill" style="width:${pct}%"></div></div>
+      <div class="flashcard" data-action="flip-card">
+        <div class="label">${showBack ? 'RESPOSTA' : 'PERGUNTA'} · ${state.reviewIndex+1}/${q.length}</div>
+        <div>
+          ${card.image ? `<img src="${card.image}" style="max-width:100%; max-height:150px; border-radius:12px; margin-bottom:14px; display:block;">` : ''}
+          <div class="content ${showBack?'answer':''}">${escapeHtml(showBack ? back : front)}</div>
+        </div>
+      </div>
+      ${!showBack ? `<div class="tap-hint">Toque no card para ver a resposta</div>` : `
+      <div class="grade-row">
+        <button class="again" data-action="grade" data-grade="0">Errei<span class="interval">${intervalLabel(card.srs,0)}</span></button>
+        <button class="hard" data-action="grade" data-grade="1">Difícil<span class="interval">${intervalLabel(card.srs,1)}</span></button>
+        <button class="good" data-action="grade" data-grade="2">Bom<span class="interval">${intervalLabel(card.srs,2)}</span></button>
+        <button class="easy" data-action="grade" data-grade="3">Fácil<span class="interval">${intervalLabel(card.srs,3)}</span></button>
+      </div>`}
+    </div>
+  </main>`;
+}
+
+/* ---------- events ---------- */
+window.__wissenEditGen = function(idx, field, value){
+  if(state.pendingGenCards && state.pendingGenCards.cards[idx]){
+    state.pendingGenCards.cards[idx][field] = value;
+  }
+};
+window.__wissenToggleImg = function(idx, checked){
+  if(state.pendingGenCards && state.pendingGenCards.cards[idx]){
+    state.pendingGenCards.cards[idx].useImage = checked;
+  }
+};
+
+function bindEvents(){
+  $app.querySelectorAll('[data-action]').forEach(el => {
+    el.addEventListener('click', onAction);
+  });
+  const photoInput = document.getElementById('photoInput');
+  if(photoInput) photoInput.addEventListener('change', onPhotoChosen);
+}
+
+function onAction(e){
+  const action = e.currentTarget.dataset.action;
+  const id = e.currentTarget.dataset.id;
+
+  if(action === 'back'){ 
+    if(state.view === 'deck') state.view = 'home';
+    else if(state.view === 'capture') { state.pendingGenCards = null; state.view = state.currentDeckId ? 'deck' : 'home'; }
+    else if(state.view === 'review') state.view = 'deck';
+    else state.view = 'home';
+    return render();
+  }
+  if(action === 'back-to-deck'){ state.view = 'deck'; return render(); }
+  if(action === 'review-again'){
+    state.reviewIndex = 0;
+    state.reviewFlipped = false;
+    state.reviewStats = {again:0, hard:0, good:0, easy:0};
+    // reembaralha pra variar a ordem
+    const q = state.reviewQueue;
+    for(let i=q.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [q[i],q[j]]=[q[j],q[i]]; }
+    return render();
+  }
+  if(action === 'pick-student'){ state.currentStudentId = id; localStorage.setItem(LS_STUDENT, id); return render(); }
+  if(action === 'add-student'){ return openStudentForm(null); }
+  if(action === 'edit-student'){ return editCurrentStudent(); }
+  if(action === 'toggle-fab'){ document.getElementById('fabMenu').classList.toggle('hidden'); return; }
+  if(action === 'open-deck'){ state.currentDeckId = id; state.view = 'deck'; return render(); }
+  if(action === 'new-deck-manual'){ return promptNewDeck(false); }
+  if(action === 'new-deck-photo'){ return promptNewDeck(true); }
+  if(action === 'pick-photo'){ return document.getElementById('photoInput').click(); }
+  if(action === 'retry-gen'){ return runGeneration(state.pendingGenCards.imageDataUrl, state.pendingGenCards.deckId); }
+  if(action === 'remove-gen-card'){
+    state.pendingGenCards.cards.splice(Number(e.currentTarget.dataset.idx), 1);
+    return render();
+  }
+  if(action === 'add-gen-card'){
+    state.pendingGenCards.cards.push({front:'', back:''});
+    return render();
+  }
+  if(action === 'save-gen-cards'){ return saveGeneratedCards(); }
+  if(action === 'add-card-manual'){ return promptAddCardManual(); }
+  if(action === 'delete-card'){ return deleteCard(id); }
+  if(action === 'delete-deck'){ return deleteDeck(); }
+  if(action === 'edit-summary'){ return openSummaryEditor(); }
+  if(action === 'start-review'){ return startReview(); }
+  if(action === 'flip-card'){ state.reviewFlipped = true; return render(); }
+  if(action === 'grade'){ return gradeCard(Number(e.currentTarget.dataset.grade)); }
+}
+
+/* ---------- students / decks / cards CRUD ---------- */
+let __studentFormState = { name:'', color:'green', avatar:'' };
+
+function openStudentForm(existingId){
+  const existing = existingId ? getStudent(existingId) : null;
+  __studentFormState = existing
+    ? { name: existing.name||'', color: existing.color||'green', avatar: existing.avatar||'', __editId: existingId }
+    : { name:'', color:'green', avatar:'' };
+
+  renderStudentFormSheet();
+}
+
+function renderStudentFormSheet(){
+  const s = __studentFormState;
+  const html = `
+    <h3>${s.__editId ? 'Editar' : 'Novo'} estudante</h3>
+    <label>Nome</label>
+    <input type="text" id="studentNameInput" value="${escapeHtml(s.name)}" placeholder="Nome do estudante">
+    <label>Cor</label>
+    <div class="color-row">
+      ${STUDENT_COLORS.map(c => `
+        <div class="color-dot ${s.color===c.id?'selected':''}" style="background:${c.hex}" data-color="${c.id}"></div>
+      `).join('')}
+    </div>
+    <label>Avatar</label>
+    <div class="avatar-grid">
+      ${AVATAR_LIST.map(a => `
+        <div class="avatar-pick ${s.avatar===a?'selected':''}" data-avatar="${a}">
+          <img src="assets/avatars/${a}.png" alt="${a}">
+        </div>
+      `).join('')}
+    </div>
+    <button class="primary" id="saveStudentBtn">Salvar</button>
+    <button class="secondary" id="cancelStudentBtn">Cancelar</button>
+  `;
+  openSheet(html);
+
+  document.querySelectorAll('.color-dot').forEach(el => {
+    el.onclick = () => { __studentFormState.color = el.dataset.color; renderStudentFormSheet(); };
+  });
+  document.querySelectorAll('.avatar-pick').forEach(el => {
+    el.onclick = () => { __studentFormState.avatar = el.dataset.avatar; renderStudentFormSheet(); };
+  });
+  document.getElementById('cancelStudentBtn').onclick = closeSheet;
+  document.getElementById('saveStudentBtn').onclick = () => {
+    const name = document.getElementById('studentNameInput').value.trim();
+    if(!name){ alert('Digite um nome.'); return; }
+    __studentFormState.name = name;
+    saveStudentForm();
+  };
+}
+
+function saveStudentForm(){
+  const s = __studentFormState;
+  const data = { name: s.name, color: s.color, avatar: s.avatar || AVATAR_LIST[0] };
+  if(s.__editId){
+    dbUpdate(`students/${s.__editId}`, data);
+  } else {
+    const id = uid();
+    dbSet(`students/${id}`, { ...data, createdAt: nowTs(), decks: {} });
+    state.currentStudentId = id;
+    localStorage.setItem(LS_STUDENT, id);
+  }
+  closeSheet();
+  render();
+}
+
+function editCurrentStudent(){
+  if(!state.currentStudentId) return;
+  openStudentForm(state.currentStudentId);
+}
+
+function promptNewDeck(goPhoto){
+  const name = prompt('Nome do baralho (ex: "Matemática — Frações"):');
+  if(!name || !name.trim()) return;
+  const id = uid();
+  dbSet(`students/${state.currentStudentId}/decks/${id}`, { name: name.trim(), createdAt: nowTs(), cards: {} });
+  state.currentDeckId = id;
+  document.getElementById('fabMenu')?.classList.add('hidden');
+  if(goPhoto){
+    state.pendingGenCards = null;
+    state.view = 'capture';
+  } else {
+    state.view = 'deck';
+  }
+  render();
+}
+
+function promptAddCardManual(){
+  const front = prompt('Pergunta / frente do card:');
+  if(!front || !front.trim()) return;
+  const back = prompt('Resposta / verso do card:');
+  if(back === null) return;
+  const id = uid();
+  dbSet(`students/${state.currentStudentId}/decks/${state.currentDeckId}/cards/${id}`, {
+    front: front.trim(), back: (back||'').trim(), createdAt: nowTs(),
+    srs: { ease:2.5, interval:0, reps:0, dueDate:0 }
+  });
+  render();
+}
+
+function deleteCard(cardId){
+  if(!confirm('Excluir este card?')) return;
+  dbRemove(`students/${state.currentStudentId}/decks/${state.currentDeckId}/cards/${cardId}`);
+  render();
+}
+
+function deleteDeck(){
+  const deck = getDecks(state.currentStudentId)[state.currentDeckId];
+  if(!deck) return;
+  if(!confirm(`Excluir o baralho "${deck.name}" e todos os seus cards? Essa ação não pode ser desfeita.`)) return;
+  dbRemove(`students/${state.currentStudentId}/decks/${state.currentDeckId}`);
+  state.currentDeckId = null;
+  state.view = 'home';
+  render();
+}
+
+function openSummaryEditor(){
+  const deck = getDecks(state.currentStudentId)[state.currentDeckId];
+  const current = (deck && deck.summary) || '';
+  const html = `
+    <h3>📝 Resumo do baralho</h3>
+    <p style="font-size:13px; color:var(--ink-soft);">Cole aqui um resumo que você já tenha (ex: gerado pelo Gemini em outra conversa) ou escreva o seu.</p>
+    <textarea id="summaryTextarea" rows="8" style="font-family:var(--sans); font-size:14px;">${escapeHtml(current)}</textarea>
+    <button class="primary" id="saveSummaryBtn">Salvar resumo</button>
+    <button class="secondary" id="cancelSummaryBtn">Cancelar</button>
+  `;
+  openSheet(html);
+  document.getElementById('cancelSummaryBtn').onclick = closeSheet;
+  document.getElementById('saveSummaryBtn').onclick = () => {
+    const text = document.getElementById('summaryTextarea').value.trim();
+    dbUpdate(`students/${state.currentStudentId}/decks/${state.currentDeckId}`, { summary: text });
+    closeSheet();
+    render();
+  };
+}
+
+/* ---------- captura de foto + geração por IA ---------- */
+function onPhotoChosen(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = reader.result;
+    state.pendingGenCards = { imageDataUrl: dataUrl, loading:true, deckId: state.currentDeckId };
+    render();
+    runGeneration(dataUrl, state.currentDeckId);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function runGeneration(dataUrl, deckId){
+  if(!aiModel){
+    state.pendingGenCards = { imageDataUrl: dataUrl, deckId, error: 'IA não disponível. Verifique se ativou o Gemini Developer API no console do Firebase (Build → AI Logic).' };
+    return render();
+  }
+  state.pendingGenCards = { imageDataUrl: dataUrl, loading:true, deckId };
+  render();
+
+  try{
+    const base64 = dataUrl.split(',')[1];
+    const mimeType = dataUrl.substring(dataUrl.indexOf(':')+1, dataUrl.indexOf(';'));
+    const prompt = `Você é um assistente de estudos para uma criança/adolescente no ensino fundamental/médio brasileiro.
+Leia o texto na imagem desta página de apostila e:
+1. Escreva um resumo curto e claro do conteúdo (máximo 6 frases, linguagem simples).
+2. Gere entre 5 e 10 cards de pergunta/resposta no estilo flashcard (como no Anki), cobrindo os pontos mais importantes para memorizar. Perguntas objetivas, respostas curtas e diretas.
+
+Responda APENAS com um JSON válido, sem markdown, sem \`\`\`, no formato exato:
+{"summary": "...", "cards": [{"front": "pergunta", "back": "resposta"}]}`;
+
+    const result = await aiModel.generateContent([
+      { inlineData: { data: base64, mimeType } },
+      prompt
+    ]);
+    let text = result.response.text().trim();
+    text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '');
+    const parsed = JSON.parse(text);
+    if(!parsed.cards || !Array.isArray(parsed.cards)) throw new Error('Formato inesperado da IA');
+    state.pendingGenCards = {
+      imageDataUrl: dataUrl, deckId,
+      summary: parsed.summary || '',
+      cards: parsed.cards.map(c => ({front: c.front||'', back: c.back||''}))
+    };
+  }catch(err){
+    console.error(err);
+    state.pendingGenCards = { imageDataUrl: dataUrl, deckId, error: 'Não consegui gerar os cards. Tente uma foto mais nítida, com boa luz, ou tente novamente.' };
+  }
+  render();
+}
+
+async function saveGeneratedCards(){
+  const gen = state.pendingGenCards;
+  if(!gen || !gen.cards.length) return;
+
+  const needsImage = gen.cards.some(c => c.useImage);
+  const compressed = needsImage ? await compressImage(gen.imageDataUrl) : null;
+
+  gen.cards.forEach(c => {
+    if(!c.front.trim()) return;
+    const id = uid();
+    const cardData = {
+      front: c.front.trim(), back: (c.back||'').trim(), createdAt: nowTs(),
+      srs: { ease:2.5, interval:0, reps:0, dueDate:0 }
+    };
+    if(c.useImage && compressed) cardData.image = compressed;
+    dbSet(`students/${state.currentStudentId}/decks/${gen.deckId}/cards/${id}`, cardData);
+  });
+  toast(`${gen.cards.length} cards salvos ✓`);
+  state.pendingGenCards = null;
+  state.currentDeckId = gen.deckId;
+  state.view = 'deck';
+  render();
+}
+
+/* ---------- revisão ---------- */
+function startReview(){
+  const cards = getCards(state.currentStudentId, state.currentDeckId);
+  const t = nowTs();
+  const due = Object.entries(cards)
+    .filter(([id,c]) => !c.srs || !c.srs.dueDate || c.srs.dueDate <= t)
+    .map(([id,c]) => ({id, front:c.front, back:c.back, image:c.image, srs:c.srs}));
+  if(!due.length) return;
+  // embaralha
+  for(let i=due.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [due[i],due[j]]=[due[j],due[i]]; }
+  state.reviewQueue = due;
+  state.reviewIndex = 0;
+  state.reviewFlipped = false;
+  state.reviewStats = {again:0, hard:0, good:0, easy:0};
+  state.view = 'review';
+  render();
+}
+
+function gradeCard(grade){
+  const card = state.reviewQueue[state.reviewIndex];
+  const newSrs = scheduleCard(card.srs, grade);
+  dbUpdate(`students/${state.currentStudentId}/decks/${state.currentDeckId}/cards/${card.id}`, { srs: newSrs });
+  const key = ['again','hard','good','easy'][grade];
+  state.reviewStats[key]++;
+  state.reviewIndex++;
+  state.reviewFlipped = false;
+  render();
+}
+
+/* ---------- boot ---------- */
+loadCache();
+const savedStudent = localStorage.getItem(LS_STUDENT);
+if(savedStudent) state.currentStudentId = savedStudent;
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+
+render();
+</script>
+</body>
+</html>
